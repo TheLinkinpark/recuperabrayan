@@ -5,6 +5,7 @@
       <main>
         <router-view />
       </main>
+      <FooTer />
     </div>
   </div>
 
@@ -12,6 +13,7 @@
 
 <script setup>
   import NavBar from "./components/NavBar.vue";
+  import FooTer from "./components/FooTer.vue"
 </script>
 
 
