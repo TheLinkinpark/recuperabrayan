@@ -1,12 +1,12 @@
 # Vue 3 + Vite
 
-* Nombre del proyecto:
+* Nombre del proyecto: Brayan Macedo Barbosa
 * Tecnologías Aplicadas: Vue 3 + Vite + vue-router
 * Versión de node: v24.14.0
 
 ## Instrucciones de instalación:
 1. Clonar repositorio
-    - git clone https://github.com/...
+    - git clone https://github.com/TheLinkinpark/recuperabrayan.git
     - cd mi-proyecto
 
 2. Instalar dependencias

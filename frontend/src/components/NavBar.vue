@@ -44,10 +44,10 @@
 </script>
 
 <style>
-/*.navbar-dark .nav-link {color: rgba(255, 255, 255, 0.9);}
+.navbar-dark .nav-link {color: rgba(255, 255, 255, 0.9);}
 
 .navbar-dark .nav-link:hover, .navbar-dark .nav-link:focus {color: #fff;}
-*/
+
 /* Logo mantiene su tamaño relativo */
 .logo {width: 40%; max-width: 120px;}
 
