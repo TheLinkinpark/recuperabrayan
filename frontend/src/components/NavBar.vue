@@ -2,7 +2,7 @@
   <nav class="navbar navbar-dark bg-primary sticky-top navbar-expand-lg">
     <div class="container-fluid">
       <!-- Marca o logo -->
-      <router-link class="navbar-brand" to="/"
+      <router-link class="navbar-brand ms-4" to="/"
         ><img src="../assets/logo.svg" class="logo"
       /></router-link>
 
