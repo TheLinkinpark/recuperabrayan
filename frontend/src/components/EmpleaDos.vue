@@ -1,91 +1,110 @@
 <template>
-  <div class="container mt-4 bg-light p-4 rounded">
-    <h1>Gestión de Empleados</h1>
+  <div class="container-fluid mt-4 bg-light p-4 rounded">
+    <h3 class="text-center my-1 bg-primary-subtle py-1 mb-3">Gestión de Empleados</h3>
 
-    <div>
-      <form @submit.prevent="addEmpleado">
-        <label for="nombre" class="form-label">Nombre: </label>
-        <input
-          type="text"
-          id="nombre"
-          name="nombre"
-          class="form-control"
-          v-model="nuevoEmpleado.nombre"
-          required
-        />
+    <div class="row g-4">
+      <!-- Columna Izquierda: Formulario -->
+      <div class="col-12 col-lg-4">
 
-        <label for="apellidos" class="form-label">Apellidos</label>
-        <input
-          type="text"
-          id="apellidos"
-          name="apellidos"
-          class="form-control"
-          v-model="nuevoEmpleado.apellidos"
-          required
-        />
+        <h4>{{ nuevoEmpleado.id ? "Editar Empleado" : "Nuevo Empleado" }}</h4>
 
-        <label for="email" class="form-label">Email</label>
-        <input
-          type="email"
-          id="email"
-          name="email"
-          class="form-control"
-          v-model="nuevoEmpleado.email"
-          required
-        />
+        <form @submit.prevent="addEmpleado">
+          <label for="nombre" class="form-label">Nombre: </label>
+          <input
+            type="text"
+            id="nombre"
+            name="nombre"
+            class="form-control"
+            v-model="nuevoEmpleado.nombre"
+            required
+          />
 
-        <label for="movil" class="form-label">Móvil</label>
-        <input
-          type="tel"
-          id="movil"
-          name="movil"
-          class="form-control"
-          v-model="nuevoEmpleado.movil"
-          required
-        />
+          <label for="apellidos" class="form-label">Apellidos</label>
+          <input
+            type="text"
+            id="apellidos"
+            name="apellidos"
+            class="form-control"
+            v-model="nuevoEmpleado.apellidos"
+            required
+          />
 
-        <label for="puesto" class="form-label">Puesto</label>
-        <select
-          id="puesto"
-          name="puesto"
-          class="form-select"
-          v-model="nuevoEmpleado.puesto"
-          required
-        >
-          <option value="RRHH">RRHH</option>
-          <option value="contabilidad">Contabilidad</option>
-          <option value="almacen">Almacén</option>
-          <option value="ventas">Ventas</option>
-        </select>
+          <label for="email" class="form-label">Email</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            class="form-control"
+            v-model="nuevoEmpleado.email"
+            required
+          />
 
-        <button type="submit" class="btn btn-primary mt-3">Añadir</button>
-      </form>
-    </div>
+          <label for="movil" class="form-label">Móvil</label>
+          <input
+            type="tel"
+            id="movil"
+            name="movil"
+            class="form-control"
+            v-model="nuevoEmpleado.movil"
+            required
+          />
 
-    <div class="table-responsive mt-4">
-      <h4>Listado de empleados</h4>
-      <table
-        class="table table-bordered table-striped table-hover table-sm align-middle"
-      >
-        <thead class="table-primary">
-          <tr>
-            <th class="text-center">Nombre</th>
-            <th class="text-center">Apellidos</th>
-            <th class="text-center">Email</th>
-            <th class="text-center">Móvil</th>
-            <th class="text-center">Puesto</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="empleado in getEmpleados()" :key="empleado.id">
-            <td class="text-center">{{ empleado.nombre }}</td>
-            <td class="text-center">{{ empleado.apellidos }}</td>
-            <td class="text-center">{{ empleado.email }}</td>
-            <td class="text-center">{{ empleado.movil }}</td>
-            <td class="text-center">{{ empleado.puesto }}</td>
-          </tr>
-        </tbody>
-      </table>
+          <label for="puesto" class="form-label">Puesto</label>
+          <select
+            id="puesto"
+            name="puesto"
+            class="form-select"
+            v-model="nuevoEmpleado.puesto"
+            required
+          >
+            <option value="RRHH">RRHH</option>
+            <option value="contabilidad">Contabilidad</option>
+            <option value="almacen">Almacén</option>
+            <option value="ventas">Ventas</option>
+          </select>
+
+          <button type="submit" class="btn btn-primary mt-3 w-100">
+            {{ nuevoEmpleado.id ? "Actualizar" : "Guardar" }}
+          </button>
+        </form>
+      </div>
+
+      <!-- Columna Derecha: Tabla -->
+      <div class="col-12 col-lg-8">
+        <div class="table-responsive">
+          <h4 class="mb-3">Listado de empleados</h4>
+          <table
+            class="table table-bordered table-striped table-hover table-sm align-middle"
+          >
+            <thead class="table-primary">
+              <tr>
+                <th class="text-center">Nombre</th>
+                <th class="text-center">Apellidos</th>
+                <th class="text-center">Email</th>
+                <th class="text-center">Móvil</th>
+                <th class="text-center">Puesto</th>
+                <th class="text-center">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="empleado in getEmpleados()" :key="empleado.id">
+                <td class="text-center">{{ empleado.nombre }}</td>
+                <td class="text-center">{{ empleado.apellidos }}</td>
+                <td class="text-center">{{ empleado.email }}</td>
+                <td class="text-center">{{ empleado.movil }}</td>
+                <td class="text-center">{{ empleado.puesto }}</td>
+                <td class="text-center">
+                  <div class="d-flex gap-2 justify-content-center align-items-center flex-wrap">
+                    <button class="btn btn-sm btn-warning" @click="selEmpleado(empleado.id)"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-sm btn-danger" @click="delEmpleado(empleado.id)"><i class="fas fa-trash"></i></button>
+                  </div>
+                </td>
+
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -106,11 +125,12 @@ const nuevoEmpleado = ref({
   puesto: "",
 });
 
+// Array de empleados inicial
 let empleados = [
   {
     id: 1,
     nombre: "Juan",
-    apellidos: "Pérez",
+    apellidos: "Pérez García",
     email: "juanpe@example.com",
     movil: "123456789",
     puesto: "RRHH",
@@ -118,7 +138,7 @@ let empleados = [
   {
     id: 2,
     nombre: "María",
-    apellidos: "García",
+    apellidos: "García López",
     email: "mariag@example.com",
     movil: "987654321",
     puesto: "contabilidad",
@@ -133,10 +153,19 @@ const addEmpleado = () => {
     alert("Por favor, corrija los errores en el formulario.");
     return;
   }
-  // Generar ID automático
-  nuevoEmpleado.value.id = generarId();
-  empleadosRef.value.push(nuevoEmpleado.value);
-  //console.log(empleados);
+  
+  if (nuevoEmpleado.value.id) {
+    // Actualizar empleado existente
+    const index = empleadosRef.value.findIndex((e) => e.id === nuevoEmpleado.value.id);
+    if (index !== -1) {
+      empleadosRef.value[index] = { ...nuevoEmpleado.value };
+    }
+  } else {
+    // Crear nuevo empleado
+    nuevoEmpleado.value.id = generarId();
+    empleadosRef.value.push(nuevoEmpleado.value);
+  }
+  
   limpiarFormulario();
 };
 
@@ -146,9 +175,16 @@ function generarId() {
   return maxId + 1;
 }
 
-function selEmpleado() {}
+function selEmpleado(id) {
+  const empleado = empleadosRef.value.find((e) => e.id === id);
+  if (empleado) {
+    nuevoEmpleado.value = { ...empleado };
+  }
+}
 
-function delEmpleado() {}
+function delEmpleado(id) {
+  empleadosRef.value = empleadosRef.value.filter((e) => e.id !== id);
+}
 
 function getEmpleados() {
   return empleadosRef.value;
