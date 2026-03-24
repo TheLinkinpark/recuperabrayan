@@ -63,7 +63,7 @@
             <option value="ventas">Ventas</option>
           </select>
 
-          <button type="submit" class="btn btn-primary mt-3 w-100">
+          <button type="submit" class="btn btn-primary mt-3 w-30 d-block mx-auto">
             {{ nuevoEmpleado.id ? "Actualizar" : "Guardar" }}
           </button>
         </form>
