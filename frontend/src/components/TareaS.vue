@@ -53,12 +53,18 @@
           </select>
 
           <label for="prioridad" class="form-label">Prioridad</label>
-          <label for="prioridad">Baja</label>
-          <input type="checkbox" id="prioridad" name="prioridad" class="form-check" />
-          <label for="prioridad">Media</label>
-          <input type="checkbox" id="prioridad" name="prioridad" class="form-check" />
-          <label for="prioridad">Alta</label>
-          <input type="checkbox" id="prioridad" name="prioridad" class="form-check" />
+          <label for="prioridad1">Baja</label>
+          <input type="radio" id="prioridad1" name="prioridad" class="form-check" v-model="nuevaTarea.prioridad" value="baja"/>
+          <label for="prioridad2">Media</label>
+          <input type="radio" id="prioridad2" name="prioridad" class="form-check" v-model="nuevaTarea.prioridad" value="media" />
+          <label for="prioridad3">Alta</label>
+          <input type="radio" id="prioridad3" name="prioridad" class="form-check" v-model="nuevaTarea.prioridad" value="alta" />
+          
+          <label for="empleadoId" class="form-label">Empleado</label>
+          <input type="button">
+            <i class="fas fa-search"></i>
+          </input>
+          
           <button type="submit" class="btn btn-primary mt-3 w-30 d-block mx-auto">
             {{ nuevaTarea.id ? "Actualizar" : "Guardar" }}
           </button>
@@ -74,21 +80,23 @@
           >
             <thead class="table-primary">
               <tr>
-                <th class="text-center">Nombre</th>
-                <th class="text-center">Apellidos</th>
-                <th class="text-center">Email</th>
-                <th class="text-center">Móvil</th>
-                <th class="text-center">Puesto</th>
+                <th class="text-center">Fecha</th>
+                <th class="text-center">Título</th>
+                <th class="text-center">Descripción</th>
+                <th class="text-center">Estado</th>
+                <th class="text-center">Prioridad</th>
+                <th class="text-center">Empleado</th>
                 <th class="text-center">Acciones</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="tarea in getTareas()" :key="tarea.id">
-                <td class="text-center">{{ tarea.nombre }}</td>
-                <td class="text-center">{{ tarea.apellidos }}</td>
-                <td class="text-center">{{ tarea.email }}</td>
-                <td class="text-center">{{ tarea.movil }}</td>
-                <td class="text-center">{{ tarea.puesto }}</td>
+                <td class="text-center">{{ tarea.fecha }}</td>
+                <td class="text-center">{{ tarea.titulo }}</td>
+                <td class="text-center">{{ tarea.descripcion }}</td>
+                <td class="text-center">{{ tarea.estado }}</td>
+                <td class="text-center">{{ tarea.prioridad }}</td>
+                <td class="text-center">{{ tarea.empleadoId }}</td>
                 <td class="text-center">
                   <div class="d-flex gap-2 justify-content-center align-items-center flex-wrap">
                     <button class="btn btn-sm btn-warning" @click="selTarea(tarea.id)"><i class="fas fa-edit"></i></button>
@@ -114,35 +122,40 @@ onMounted(() => {
 
 const nuevaTarea = ref({
   id: null,
-  nombre: "",
-  apellidos: "",
-  email: "",
-  movil: "",
-  puesto: "",
+  fecha: "",
+  titulo: "",
+  descripcion: "",
+  estado: "",
+  prioridad: "",
+  empleadoId: null,
 });
 
 // Array de tareas inicial
 let tareas = [
   {
     id: 1,
-    nombre: "Juan",
-    apellidos: "Pérez García",
-    email: "juanpe@example.com",
-    movil: "123456789",
-    puesto: "RRHH",
+    fecha: "2026-04-07",
+    titulo: "Terminar entrega proyecto",
+    descripcion: "Entregar el proyecto antes del 14 de abril",
+    estado: "pendiente",
+    prioridad: "alta",
+    empleadoId: 1,
   },
   {
     id: 2,
-    nombre: "María",
-    apellidos: "García López",
-    email: "mariag@example.com",
-    movil: "987654321",
-    puesto: "contabilidad",
+    fecha: "2026-04-08",
+    titulo: "Reunión con cliente",
+    descripcion: "Reunión para discutir los detalles del proyecto",
+    estado: "proceso",
+    prioridad: "media",
+    empleadoId: 2,
   },
 ];
 
 const tareasRef = ref(tareas);
 
+
+/* FUNCIONES CRUD */
 
 const addTarea = () => {
   if (!validaciones(nuevaTarea.value)) {
@@ -187,17 +200,9 @@ function getTareas() {
 }
 
 function validaciones(tarea) {
-  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  const reMovil = /^\d{9}$/;
   let esValido = true;
 
-  if (!re.test(tarea.email)) {
-    esValido = false;
-  }
-  if (!reMovil.test(tarea.movil)) {
-    esValido = false;
-  }
-  if (!tarea.nombre.trim() || !tarea.apellidos.trim()) {
+  if (!tarea.titulo.trim() || !tarea.descripcion.trim() || !tarea.fecha.trim()) {
     esValido = false;
   }
   return esValido;
@@ -206,11 +211,12 @@ function validaciones(tarea) {
 function limpiarFormulario() {
   nuevaTarea.value = {
     id: null,
-    nombre: "",
-    apellidos: "",
-    email: "",
-    movil: "",
-    puesto: "",
+    fecha: "",
+    titulo: "",
+    descripcion: "",
+    estado: "",
+    prioridad: "",
+    empleadoId: null,
   };
 }
 </script>
