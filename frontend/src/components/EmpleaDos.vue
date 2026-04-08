@@ -190,6 +190,8 @@ function getEmpleados() {
   return empleadosRef.value;
 }
 
+defineExpose({ getEmpleados })
+
 function validaciones(empleado) {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const reMovil = /^\d{9}$/;
