@@ -2,8 +2,7 @@
   <EmpleaDos ref="empleadosComponent" class="d-none" />
   <div class="container-fluid mt-4 p-3 p-md-4 bg-light rounded-4 border shadow-sm">
     <div class="text-center mb-4">
-      <h3 class="mb-1">Gestión de Tareas</h3>
-      <p class="mb-0 text-secondary">Organiza, prioriza y da seguimiento a cada actividad del equipo.</p>
+      <h3 class="text-center my-1 bg-primary-subtle py-1 mb-3">Gestión de Tareas</h3>
     </div>
 
     <div class="row g-4 align-items-start">
@@ -13,7 +12,6 @@
           <div class="card-body p-4">
           <div class="d-flex justify-content-between align-items-center mb-3">
             <h4 class="mb-0">{{ nuevaTarea.id ? "Editar Tarea" : "Nueva Tarea" }}</h4>
-            <span class="badge rounded-pill text-bg-light border">Formulario</span>
           </div>
 
           <form @submit.prevent="addTarea">
@@ -77,16 +75,37 @@
               <div class="col-12 col-md-5">
                 <div>
                   <label for="empleadoId" class="form-label">Empleado</label>
-                  <button
-                    type="button"
-                    id="empleadoId"
-                    name="empleadoId"
-                    class="btn btn-outline-primary d-inline-flex align-items-center justify-content-center rounded-3 px-3 py-2"
-                    aria-label="Buscar empleado"
+                  <div class="d-flex align-items-stretch gap-2">
+                    <input
+                      type="number"
+                      id="empleadoId"
+                      name="empleadoId"
+                      class="form-control"
+                      placeholder="Introducir ID"
+                      v-model.number="nuevaTarea.empleadoId"
+                      :class="{
+                        'bg-warning-subtle border border-warning': estadoEmpleadoId === 'valid',
+                        'is-invalid': estadoEmpleadoId === 'invalid',
+                      }"
+                      @input="limpiarEstadoEmpleadoId"
+                      @blur="validarEmpleadoSeleccionado"
+                    />
+                    <button
+                      type="button"
+                      class="btn btn-outline-primary d-inline-flex align-items-center justify-content-center rounded-3 px-3"
+                      aria-label="Buscar empleado"
+                      @click="validarEmpleadoSeleccionado"
+                    >
+                      <i class="fas fa-search" aria-hidden="true"></i>
+                    </button>
+                  </div>
+                  <div
+                    v-if="mensajeEmpleadoId"
+                    class="form-text"
+                    :class="estadoEmpleadoId === 'invalid' ? 'text-danger' : 'text-warning-emphasis'"
                   >
-                    <i class="fas fa-search" aria-hidden="true"></i>
-                  </button>
-                  <input type="number" class="form-control" placeholder="Introduce el ID" v-model.number="nuevaTarea.empleadoId" />
+                    {{ mensajeEmpleadoId }}
+                  </div>
                 </div>
               </div>
             </div>
@@ -151,7 +170,7 @@
           <div class="table-responsive">
             <h4 class="mb-3">Listado de tareas</h4>
           <table
-            class="table table-bordered table-hover table-sm align-middle mb-0"
+            class="table table-bordered table-striped table-hover table-sm align-middle mb-0"
           >
             <thead class="table-primary">
               <tr>
@@ -179,7 +198,7 @@
                     {{ formatearEstado(tarea.prioridad) }}
                   </span>
                 </td>
-                <td class="text-center">{{ tarea.empleadoId }}</td>
+                <td class="text-center">{{ tarea.empleadoNombre || obtenerNombreEmpleado(tarea.empleadoId) }}</td>
                 <td class="text-center">
                   <div class="d-flex gap-2 justify-content-center align-items-center flex-wrap">
                     <button class="btn btn-sm btn-warning" @click="selTarea(tarea.id)"><i class="fas fa-edit"></i></button>
@@ -200,6 +219,7 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
+import Swal from "sweetalert2";
 import EmpleaDos from "./EmpleaDos.vue";
 
 
@@ -215,7 +235,11 @@ const nuevaTarea = ref({
   estado: "",
   prioridad: "",
   empleadoId: null,
+  empleadoNombre: "",
 });
+
+const estadoEmpleadoId = ref("");
+const mensajeEmpleadoId = ref("");
 
 const empleadosComponent = ref(null);
 
@@ -229,6 +253,7 @@ let tareas = [
     estado: "pendiente",
     prioridad: "alta",
     empleadoId: 1,
+    empleadoNombre: "Juan Pérez García",
   },
   {
     id: 2,
@@ -238,6 +263,7 @@ let tareas = [
     estado: "proceso",
     prioridad: "media",
     empleadoId: 2,
+    empleadoNombre: "María García López",
   },
 ];
 
@@ -250,6 +276,11 @@ const addTarea = () => {
   if (!validaciones(nuevaTarea.value)) {
     alert("Por favor, corrija los errores en el formulario.");
     return;
+  }
+
+  const empleado = buscarEmpleadoPorId(nuevaTarea.value.empleadoId);
+  if (empleado) {
+    nuevaTarea.value.empleadoNombre = obtenerNombreCompletoEmpleado(empleado);
   }
   
   if (nuevaTarea.value.id) {
@@ -276,7 +307,20 @@ function generarId() {
 function selTarea(id) {
   const tarea = tareasRef.value.find((e) => e.id === id);
   if (tarea) {
-    nuevaTarea.value = { ...tarea };
+    nuevaTarea.value = {
+      ...tarea,
+      empleadoNombre: tarea.empleadoNombre || obtenerNombreEmpleado(tarea.empleadoId),
+    };
+    const empleado = buscarEmpleadoPorId(tarea.empleadoId);
+    if (empleado) {
+      estadoEmpleadoId.value = "valid";
+      mensajeEmpleadoId.value = `Empleado encontrado: ${obtenerNombreCompletoEmpleado(empleado)}`;
+    } else if (tarea.empleadoId) {
+      estadoEmpleadoId.value = "invalid";
+      mensajeEmpleadoId.value = "Empleado no encontrado";
+    } else {
+      limpiarEstadoEmpleadoId();
+    }
   }
 }
 
@@ -293,20 +337,62 @@ function verEmpleados() {
   return empleados;
 }
 
-function comprobarEmpleado(id) {
+function buscarEmpleadoPorId(id) {
   const idNormalizado = Number(id);
   if (!Number.isInteger(idNormalizado) || idNormalizado <= 0) {
-    return "Empleado no encontrado";
+    return null;
   }
 
   const empleados = verEmpleados();
-  /*
-  if (!empleados.find((e) => e.id === idNormalizado)) {
-    return "Empleado no encontrado";
+  return empleados.find((e) => e.id === idNormalizado) ?? null;
+}
+
+function obtenerNombreCompletoEmpleado(empleado) {
+  return `${empleado.nombre} ${empleado.apellidos}`.trim();
+}
+
+function obtenerNombreEmpleado(id) {
+  const empleado = buscarEmpleadoPorId(id);
+  return empleado ? obtenerNombreCompletoEmpleado(empleado) : "Empleado no encontrado";
+}
+
+function limpiarEstadoEmpleadoId() {
+  if (!nuevaTarea.value.empleadoId) {
+    estadoEmpleadoId.value = "";
+    mensajeEmpleadoId.value = "";
+    nuevaTarea.value.empleadoNombre = "";
+    return;
   }
-  */
-  const empleado = empleados.find((e) => e.id === idNormalizado);
-  return empleado ? empleado.nombre : "Empleado no encontrado";
+
+  estadoEmpleadoId.value = "";
+  mensajeEmpleadoId.value = "";
+}
+
+function validarEmpleadoSeleccionado() {
+  if (!nuevaTarea.value.empleadoId) {
+    limpiarEstadoEmpleadoId();
+    return false;
+  }
+
+  const empleado = buscarEmpleadoPorId(nuevaTarea.value.empleadoId);
+  if (empleado) {
+    estadoEmpleadoId.value = "valid";
+    mensajeEmpleadoId.value = `Empleado encontrado: ${obtenerNombreCompletoEmpleado(empleado)}`;
+    nuevaTarea.value.empleadoNombre = obtenerNombreCompletoEmpleado(empleado);
+    nuevaTarea.value.empleadoId = empleado.id;
+    return true;
+  }
+
+  estadoEmpleadoId.value = "invalid";
+  mensajeEmpleadoId.value = "Empleado no encontrado";
+  Swal.fire({
+    icon: "warning",
+    title: "Empleado no encontrado",
+    text: "El ID introducido no existe.",
+  });
+  nuevaTarea.value.empleadoId = null;
+  nuevaTarea.value.empleadoNombre = "";
+  return false;
 } 
 
 /* COLORES ESTADO / PRIORIDAD */
@@ -337,6 +423,7 @@ function formatearEstado(estado) {
 
 function validaciones(tarea) {
   let esValido = true;
+  const empleado = buscarEmpleadoPorId(tarea.empleadoId);
 
   if (
     !tarea.titulo.trim() ||
@@ -344,10 +431,15 @@ function validaciones(tarea) {
     !tarea.fecha.trim() ||
     !tarea.estado ||
     !tarea.prioridad ||
-    comprobarEmpleado(tarea.empleadoId) === "Empleado no encontrado"
+    !empleado
   ) {
     esValido = false;
   }
+
+  if (!empleado && tarea.empleadoId) {
+    validarEmpleadoSeleccionado();
+  }
+
   return esValido;
 }
 
@@ -361,6 +453,8 @@ function limpiarFormulario() {
     estado: "",
     prioridad: "",
     empleadoId: null,
+    empleadoNombre: "",
   };
+  limpiarEstadoEmpleadoId();
 }
 </script>
