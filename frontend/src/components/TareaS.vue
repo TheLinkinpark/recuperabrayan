@@ -89,6 +89,7 @@
                       }"
                       @input="limpiarEstadoEmpleadoId"
                       @blur="validarEmpleadoSeleccionado"
+                      required
                     />
                     <button
                       type="button"
@@ -110,42 +111,24 @@
               </div>
             </div>
 
-            <div class="mt-3">
-              <label class="form-label d-block">Prioridad</label>
+            <div class="d-flex flex-row mt-4 gap-4">
+              
+              <label class="form-label d-block mb-0">Prioridad</label>
+
               <div class="d-flex flex-wrap gap-2" role="group" aria-label="Seleccionar prioridad">
-                <input
-                  type="radio"
-                  class="btn-check"
-                  id="prioridad1"
-                  name="prioridad"
-                  v-model="nuevaTarea.prioridad"
-                  value="baja"
-                />
-                <label class="btn btn-outline-success rounded-pill px-3" for="prioridad1">Baja</label>
+                
+                <input type="radio" class="btn-check" id="prioridad1" name="prioridad" v-model="nuevaTarea.prioridad" value="baja" checked/>
+                <label class="btn btn-outline-success rounded-pill px-3 me-2" for="prioridad1">Baja</label>
 
-                <input
-                  type="radio"
-                  class="btn-check"
-                  id="prioridad2"
-                  name="prioridad"
-                  v-model="nuevaTarea.prioridad"
-                  value="media"
-                />
-                <label class="btn btn-outline-warning rounded-pill px-3" for="prioridad2">Media</label>
+                <input type="radio" class="btn-check" id="prioridad2" name="prioridad" v-model="nuevaTarea.prioridad" value="media"/>
+                <label class="btn btn-outline-warning rounded-pill px-3 me-2" for="prioridad2">Media</label>
 
-                <input
-                  type="radio"
-                  class="btn-check"
-                  id="prioridad3"
-                  name="prioridad"
-                  v-model="nuevaTarea.prioridad"
-                  value="alta"
-                />
-                <label class="btn btn-outline-danger rounded-pill px-3" for="prioridad3">Alta</label>
+                <input type="radio" class="btn-check" id="prioridad3" name="prioridad" v-model="nuevaTarea.prioridad" value="alta"/>
+                <label class="btn btn-outline-danger rounded-pill px-3 me-2" for="prioridad3">Alta</label>
               </div>
             </div>
 
-            <div class="d-flex flex-wrap gap-2 mt-4">
+            <div class="d-flex flex-wrap gap-2 mt-4 justify-content-center">
               <button type="submit" class="btn btn-primary px-4">
                 {{ nuevaTarea.id ? "Actualizar" : "Guardar" }}
               </button>
@@ -155,7 +138,7 @@
                 class="btn btn-outline-secondary"
                 @click="limpiarFormulario"
               >
-                Cancelar edición
+                Cancelar
               </button>
             </div>
           </form>
@@ -398,7 +381,6 @@ function validarEmpleadoSeleccionado() {
 /* COLORES ESTADO / PRIORIDAD */
 
 
-
 function getEstadoBadgeClass(estado) {
   if (estado === "pendiente") return "text-bg-danger";
   if (estado === "proceso") return "text-bg-warning text-dark";
@@ -417,8 +399,6 @@ function formatearEstado(estado) {
   if (estado === "proceso") return "En proceso";
   return estado ? estado.charAt(0).toUpperCase() + estado.slice(1) : "";
 }
-
-
 
 
 function validaciones(tarea) {

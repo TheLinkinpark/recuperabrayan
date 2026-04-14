@@ -4,9 +4,13 @@
 
     <div class="row g-4">
       <!-- Columna Izquierda: Formulario -->
-      <div class="col-12 col-lg-4">
 
-        <h4>{{ nuevoEmpleado.id ? "Editar Empleado" : "Nuevo Empleado" }}</h4>
+      <div class="col-12 col-xl-5">
+        <div class="card border-0 shadow-sm rounded-4">
+          <div class="card-body p-4">
+            <div class="dflex justify-content-between align-items-center mb-3">
+              <h4>{{ nuevoEmpleado.id ? "Editar Empleado" : "Nuevo Empleado" }}</h4>
+            </div>
 
         <form @submit.prevent="addEmpleado">
           <label for="nombre" class="form-label">Nombre: </label>
@@ -67,10 +71,14 @@
             {{ nuevoEmpleado.id ? "Actualizar" : "Guardar" }}
           </button>
         </form>
+        </div>
+        </div>
       </div>
 
       <!-- Columna Derecha: Tabla -->
-      <div class="col-12 col-lg-8">
+      <div class="col-12 col-xl-7">
+        <div class="card border-0 shadow-sm rounded-4">
+          <div class="card-body p-3 p-md-4">
         <div class="table-responsive">
           <h4 class="mb-3">Listado de empleados</h4>
           <table
@@ -103,6 +111,8 @@
               </tr>
             </tbody>
           </table>
+          </div>
+        </div>
         </div>
       </div>
     </div>
