@@ -1,0 +1,45 @@
+{
+    "empleados": [
+        {
+        "id": 1,
+        "nombre": "Juan",
+        "apellidos": "Pérez García",
+        "email": "juanpe@example.com",
+        "movil": "123456789",
+        "puesto": "RRHH"
+        },
+
+        {
+        "id": 2,
+        "nombre": "María",
+        "apellidos": "García López",
+        "email": "mariag@example.com",
+        "movil": "987654321",
+        "puesto": "contabilidad"
+        }
+    ],
+
+
+    "tareas": [
+        {
+            "id": 1,
+            "fecha": "2026-04-07",
+            "titulo": "Terminar entrega proyecto",
+            "descripcion": "Entregar el proyecto antes del 14 de abril",
+            "estado": "pendiente",
+            "prioridad": "alta",
+            "empleadoId": 1,
+            "empleadoNombre": "Juan Pérez García"
+        },
+        {
+            "id": 2,
+            "fecha": "2026-04-08",
+            "titulo": "Reunión con cliente",
+            "descripcion": "Reunión para discutir los detalles del proyecto",
+            "estado": "proceso",
+            "prioridad": "media",
+            "empleadoId": 2,
+            "empleadoNombre": "María García López"
+        }
+    ]
+}
