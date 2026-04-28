@@ -1,5 +1,4 @@
 <template>
-  <EmpleaDos ref="empleadosComponent" class="d-none" />
   <div class="container-fluid mt-4 p-3 p-md-4 bg-light rounded-4 border shadow-sm">
     <div class="text-center mb-4">
       <h3 class="text-center my-1 bg-primary-subtle py-1 mb-3">Gestión de Tareas</h3>
@@ -14,7 +13,7 @@
             <h4 class="mb-0">{{ nuevaTarea.id ? "Editar Tarea" : "Nueva Tarea" }}</h4>
           </div>
 
-          <form @submit.prevent="addTarea">
+          <form @submit.prevent="guardarTarea">
             <div class="mb-3">
               <label for="fecha" class="form-label">Fecha</label>
               <input
@@ -185,7 +184,7 @@
                 <td class="text-center">
                   <div class="d-flex gap-2 justify-content-center align-items-center flex-wrap">
                     <button class="btn btn-sm btn-warning" @click="selTarea(tarea.id)"><i class="fas fa-edit"></i></button>
-                    <button class="btn btn-sm btn-danger" @click="delTarea(tarea.id)"><i class="fas fa-trash"></i></button>
+                    <button class="btn btn-sm btn-danger" @click="borrarTarea(tarea.id)"><i class="fas fa-trash"></i></button>
                   </div>
                 </td>
 
@@ -203,12 +202,13 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { getTareas, addTareas, updateTareas, delTareas } from "../api/tareas.js";
+import { getEmpleados } from "../api/empleados.js";
 import Swal from "sweetalert2";
-import EmpleaDos from "./EmpleaDos.vue";
 
 
 onMounted(() => {
   obtenerTareas();
+  verEmpleados();
 });
 
 const nuevaTarea = ref({
@@ -225,40 +225,22 @@ const nuevaTarea = ref({
 const estadoEmpleadoId = ref("");
 const mensajeEmpleadoId = ref("");
 
-const empleadosComponent = ref(null);
+const empleadosRef = ref([]);
 
-// Array de tareas inicial
-let tareas = [
-  {
-    id: 1,
-    fecha: "2026-04-07",
-    titulo: "Terminar entrega proyecto",
-    descripcion: "Entregar el proyecto antes del 14 de abril",
-    estado: "pendiente",
-    prioridad: "alta",
-    empleadoId: 1,
-    empleadoNombre: "Juan Pérez García",
-  },
-  {
-    id: 2,
-    fecha: "2026-04-08",
-    titulo: "Reunión con cliente",
-    descripcion: "Reunión para discutir los detalles del proyecto",
-    estado: "proceso",
-    prioridad: "media",
-    empleadoId: 2,
-    empleadoNombre: "María García López",
-  },
-];
 
-const tareasRef = ref(tareas);
+
+const tareasRef = ref([]);
 
 
 /* FUNCIONES CRUD */
 
-const addTarea = () => {
+const guardarTarea = async () => {
   if (!validaciones(nuevaTarea.value)) {
-    alert("Por favor, corrija los errores en el formulario.");
+    Swal.fire({
+      icon: "warning",
+      title: "Datos incompletos o inválidos",
+      text: "Por favor, completa todos los campos correctamente antes de guardar.",
+    });
     return;
   }
 
@@ -269,14 +251,16 @@ const addTarea = () => {
   
   if (nuevaTarea.value.id) {
     // Actualizar tarea existente
-    const index = tareasRef.value.findIndex((e) => e.id === nuevaTarea.value.id);
-    if (index !== -1) {
-      tareasRef.value[index] = { ...nuevaTarea.value };
+    const tareaOriginal = tareasRef.value.findIndex((e) => e.id === nuevaTarea.value.id);
+    if (tareaOriginal !== -1) {
+      await updateTareas(nuevaTarea.value.id, nuevaTarea.value);
+      Swal.fire({ icon: "success", title: "Tarea actualizada", text:"La tarea ha sido actualizada correctamente." });
     }
   } else {
     // Crear nueva tarea
     nuevaTarea.value.id = generarId();
-    tareasRef.value.push(nuevaTarea.value);
+    tareasRef.value = await addTareas(nuevaTarea.value);
+    Swal.fire({ icon: "success", title: "Tarea agregada", text: "La tarea ha sido agregada correctamente." });
   }
   
   limpiarFormulario();
@@ -308,17 +292,23 @@ function selTarea(id) {
   }
 }
 
-function delTarea(id) {
-  tareasRef.value = tareasRef.value.filter((e) => e.id !== id);
+const borrarTarea = async (id) => {
+  tareasRef.value = await delTareas(id);
+  Swal.fire({ icon: "success", title: "Tarea eliminada", text: "La tarea ha sido eliminada correctamente." });
 }
 
-function obtenerTareas() {
+const obtenerTareas = () => {
+  getTareas().then((data) => {
+    tareasRef.value = data;
+  });
   return tareasRef.value;
 }
 
-function verEmpleados() {
-  const empleados = empleadosComponent.value?.getEmpleados?.() ?? [];
-  return empleados;
+const verEmpleados = () => {
+  getEmpleados().then((data) => {
+    empleadosRef.value = data;
+  });
+  return empleadosRef.value;
 }
 
 function buscarEmpleadoPorId(id) {
@@ -327,8 +317,7 @@ function buscarEmpleadoPorId(id) {
     return null;
   }
 
-  const empleados = verEmpleados();
-  return empleados.find((e) => e.id === idNormalizado) ?? null;
+  return empleadosRef.value.find((e) => String(e.id) === String(idNormalizado)) ?? null;
 }
 
 function obtenerNombreCompletoEmpleado(empleado) {

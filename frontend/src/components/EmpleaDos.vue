@@ -12,7 +12,7 @@
               <h4>{{ nuevoEmpleado.id ? "Editar Empleado" : "Nuevo Empleado" }}</h4>
             </div>
 
-        <form @submit.prevent="addEmpleado">
+        <form @submit.prevent="guardarEmpleado">
           <label for="nombre" class="form-label">Nombre: </label>
           <input
             type="text"
@@ -104,7 +104,7 @@
                 <td class="text-center">
                   <div class="d-flex gap-2 justify-content-center align-items-center flex-wrap">
                     <button class="btn btn-sm btn-warning" @click="selEmpleado(empleado.id)"><i class="fas fa-edit"></i></button>
-                    <button class="btn btn-sm btn-danger" @click="delEmpleado(empleado.id)"><i class="fas fa-trash"></i></button>
+                    <button class="btn btn-sm btn-danger" @click="borrarEmpleado(empleado.id)"><i class="fas fa-trash"></i></button>
                   </div>
                 </td>
 
@@ -121,6 +121,7 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
+import Swal from "sweetalert2";
 import { getEmpleados, addEmpleados, updateEmpleados, delEmpleados } from "../api/empleados.js";
 
 onMounted(() => {
@@ -136,45 +137,32 @@ const nuevoEmpleado = ref({
   puesto: "",
 });
 
-// Array de empleados inicial
-let empleados = [
-  {
-    id: 1,
-    nombre: "Juan",
-    apellidos: "Pérez García",
-    email: "juanpe@example.com",
-    movil: "123456789",
-    puesto: "RRHH",
-  },
-  {
-    id: 2,
-    nombre: "María",
-    apellidos: "García López",
-    email: "mariag@example.com",
-    movil: "987654321",
-    puesto: "contabilidad",
-  },
-];
 
-const empleadosRef = ref(empleados);
+const empleadosRef = ref([]);
 
 
-const addEmpleado = () => {
+const guardarEmpleado = async () => {
   if (!validaciones(nuevoEmpleado.value)) {
-    alert("Por favor, corrija los errores en el formulario.");
+       Swal.fire({
+      icon: "warning",
+      title: "Datos incompletos o inválidos",
+      text: "Por favor, completa todos los campos correctamente antes de guardar.",
+    });
     return;
   }
   
   if (nuevoEmpleado.value.id) {
     // Actualizar empleado existente
-    const index = empleadosRef.value.findIndex((e) => e.id === nuevoEmpleado.value.id);
-    if (index !== -1) {
-      empleadosRef.value[index] = { ...nuevoEmpleado.value };
+    const empleadoOriginal = empleadosRef.value.findIndex((e) => e.id === nuevoEmpleado.value.id);
+    if (empleadoOriginal !== -1) {
+      await updateEmpleados(nuevoEmpleado.value.id, nuevoEmpleado.value);
+      Swal.fire({ icon: "success", title: "Empleado actualizado", text: "El empleado ha sido actualizado correctamente." });
     }
   } else {
     // Crear nuevo empleado
     nuevoEmpleado.value.id = generarId();
-    empleadosRef.value.push(nuevoEmpleado.value);
+    empleadosRef.value = await addEmpleados(nuevoEmpleado.value);
+    Swal.fire({ icon: "success", title: "Empleado agregado", text: "El empleado ha sido agregado correctamente." });
   }
   
   limpiarFormulario();
@@ -193,15 +181,18 @@ function selEmpleado(id) {
   }
 }
 
-function delEmpleado(id) {
-  empleadosRef.value = empleadosRef.value.filter((e) => e.id !== id);
+const borrarEmpleado = async (id) => {
+  empleadosRef.value = await delEmpleados(id);
+  Swal.fire({ icon: "success", title: "Empleado eliminado", text: "El empleado ha sido eliminado correctamente." });
 }
 
-function obtenerEmpleados() {
+const obtenerEmpleados = () => {
+  getEmpleados().then((data) => {
+    empleadosRef.value = data;
+  });
   return empleadosRef.value;
 }
 
-defineExpose({ obtenerEmpleados })
 
 function validaciones(empleado) {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
