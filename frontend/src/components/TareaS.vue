@@ -167,7 +167,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="tarea in getTareas()" :key="tarea.id">
+              <tr v-for="tarea in obtenerTareas()" :key="tarea.id">
                 <td class="text-center">{{ tarea.fecha }}</td>
                 <td class="text-center">{{ tarea.titulo }}</td>
                 <td class="text-center">{{ tarea.descripcion }}</td>
@@ -202,12 +202,13 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
+import { getTareas, addTareas, updateTareas, delTareas } from "../api/tareas.js";
 import Swal from "sweetalert2";
 import EmpleaDos from "./EmpleaDos.vue";
 
 
 onMounted(() => {
-  getTareas();
+  obtenerTareas();
 });
 
 const nuevaTarea = ref({
@@ -311,7 +312,7 @@ function delTarea(id) {
   tareasRef.value = tareasRef.value.filter((e) => e.id !== id);
 }
 
-function getTareas() {
+function obtenerTareas() {
   return tareasRef.value;
 }
 

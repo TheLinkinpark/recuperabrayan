@@ -95,7 +95,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="empleado in getEmpleados()" :key="empleado.id">
+              <tr v-for="empleado in obtenerEmpleados()" :key="empleado.id">
                 <td class="text-center">{{ empleado.nombre }}</td>
                 <td class="text-center">{{ empleado.apellidos }}</td>
                 <td class="text-center">{{ empleado.email }}</td>
@@ -121,9 +121,10 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
+import { getEmpleados, addEmpleados, updateEmpleados, delEmpleados } from "../api/empleados.js";
 
 onMounted(() => {
-  getEmpleados();
+  obtenerEmpleados();
 });
 
 const nuevoEmpleado = ref({
@@ -196,11 +197,11 @@ function delEmpleado(id) {
   empleadosRef.value = empleadosRef.value.filter((e) => e.id !== id);
 }
 
-function getEmpleados() {
+function obtenerEmpleados() {
   return empleadosRef.value;
 }
 
-defineExpose({ getEmpleados })
+defineExpose({ obtenerEmpleados })
 
 function validaciones(empleado) {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
