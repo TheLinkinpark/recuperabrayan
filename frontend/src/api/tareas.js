@@ -7,9 +7,8 @@ export const getTareas = async () => {
     return res.data;
 }
 
-export const addTareas = async (nuevaTarea) => {
-    const res = await axios.post(API_URL, nuevaTarea);
-    return res.data;
+export const addTareas = async (tareas) => {
+    const res = await axios.post(API_URL, tareas).then(res => res.data);
 }
 
 export const updateTareas = async (id, tareaActualizada) => {

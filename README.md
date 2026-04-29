@@ -1,7 +1,7 @@
 # Vue 3 + Vite
 
 * Nombre del proyecto: Brayan Macedo Barbosa
-* Tecnologías Aplicadas: Vue 3 + Vite + vue-router
+* Tecnologías Aplicadas: Vue 3 + Vite + vue-router, json-server, axios, bootstrap
 * Versión de node: v24.14.0
 
 ## Instrucciones de instalación:
@@ -13,9 +13,7 @@
     - npm install
 
 3. Arrancar App
-    - npm run dev
+    - npm start
 
 4. Ver en navegador
     - http://localhost:5173
-
-5. Configurar variables de entorno

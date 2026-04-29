@@ -2,18 +2,47 @@
   "empleados": [
     {
       "id": "1",
+      "empleadoId": 1,
       "nombre": "Juan",
-      "apellidos": "Pérez Alonso",
+      "apellidos": "Pérez Fernandez",
       "email": "juanpe@example.com",
-      "movil": "123456789",
+      "movil": "612345678",
       "puesto": "contabilidad"
     },
     {
       "id": "2",
+      "empleadoId": 2,
       "nombre": "María",
       "apellidos": "García López",
       "email": "mariag@example.com",
       "movil": "987654321",
+      "puesto": "almacen"
+    },
+    {
+      "id": "3",
+      "empleadoId": 3,
+      "nombre": "Pedro",
+      "apellidos": "Rodríguez García",
+      "email": "pedrom@example.com",
+      "movil": "555555555",
+      "puesto": "RRHH"
+    },
+    {
+      "id": "4",
+      "empleadoId": 4,
+      "nombre": "Anxo",
+      "apellidos": "López Martínez",
+      "email": "anxo@example.com",
+      "movil": "987654321",
+      "puesto": "ventas"
+    },
+    {
+      "id": "5",
+      "empleadoId": 5,
+      "nombre": "Rodrigo",
+      "apellidos": "Sánchez Martínez",
+      "email": "rodrigo@example.com",
+      "movil": "612345678",
       "puesto": "almacen"
     }
   ],
@@ -23,10 +52,9 @@
       "fecha": "2026-04-07",
       "titulo": "Terminar entrega proyecto",
       "descripcion": "Entregar el proyecto antes del 14 de abril",
-      "estado": "pendiente",
+      "estado": "finalizada",
       "prioridad": "alta",
-      "empleadoId": 1,
-      "empleadoNombre": "Juan Pérez García"
+      "empleadoId": 1
     },
     {
       "id": "2",
@@ -35,9 +63,34 @@
       "descripcion": "Reunión para discutir los detalles del proyecto",
       "estado": "proceso",
       "prioridad": "media",
-      "empleadoId": 2,
-      "empleadoNombre": "María García López"
+      "empleadoId": 2
+    },
+    {
+      "id": "3",
+      "fecha": "2026-04-09",
+      "titulo": "Envío de informe mensual",
+      "descripcion": "Enviar el informe mensual al equipo de dirección",
+      "estado": "proceso",
+      "prioridad": "baja",
+      "empleadoId": 4
+    },
+    {
+      "id": "4",
+      "fecha": "2026-04-10",
+      "titulo": "Organizar archivo de documentos",
+      "descripcion": "Organizar y digitalizar los documentos del departamento",
+      "estado": "pendiente",
+      "prioridad": "media",
+      "empleadoId": 3
+    },
+    {
+      "id": "5",
+      "fecha": "2026-04-11",
+      "titulo": "Preparar presentación para la reunión de ventas",
+      "descripcion": "Crear una presentación para la reunión de ventas del próximo lunes",
+      "estado": "finalizada",
+      "prioridad": "alta",
+      "empleadoId": 4
     }
-  ],
-  "$schema": "./node_modules/json-server/schema.json"
+  ]
 }

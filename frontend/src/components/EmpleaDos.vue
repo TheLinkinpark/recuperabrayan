@@ -67,9 +67,19 @@
             <option value="ventas">Ventas</option>
           </select>
 
-          <button type="submit" class="btn btn-primary mt-3 w-30 d-block mx-auto">
-            {{ nuevoEmpleado.id ? "Actualizar" : "Guardar" }}
-          </button>
+          <div class="d-flex flex-wrap gap-2 mt-4 justify-content-center">
+            <button type="submit" class="btn btn-primary px-4">
+              {{ nuevoEmpleado.id ? "Actualizar" : "Guardar" }}
+            </button>
+            <button
+                  v-if="nuevoEmpleado.id"
+                  type="button"
+                  class="btn btn-outline-secondary"
+                  @click="limpiarFormulario"
+                >
+                  Cancelar
+              </button>
+            </div>
         </form>
         </div>
         </div>
@@ -103,7 +113,7 @@
                 <td class="text-center">{{ empleado.puesto }}</td>
                 <td class="text-center">
                   <div class="d-flex gap-2 justify-content-center align-items-center flex-wrap">
-                    <button class="btn btn-sm btn-warning" @click="selEmpleado(empleado.id)"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-sm btn-warning" @click="selEmpleado(empleado.empleadoId)"><i class="fas fa-edit"></i></button>
                     <button class="btn btn-sm btn-danger" @click="borrarEmpleado(empleado.id)"><i class="fas fa-trash"></i></button>
                   </div>
                 </td>
@@ -130,6 +140,7 @@ onMounted(() => {
 
 const nuevoEmpleado = ref({
   id: null,
+  empleadoId: null,
   nombre: "",
   apellidos: "",
   email: "",
@@ -151,16 +162,16 @@ const guardarEmpleado = async () => {
     return;
   }
   
-  if (nuevoEmpleado.value.id) {
+  if (nuevoEmpleado.value.empleadoId) {
     // Actualizar empleado existente
-    const empleadoOriginal = empleadosRef.value.findIndex((e) => e.id === nuevoEmpleado.value.id);
+    const empleadoOriginal = empleadosRef.value.findIndex((e) => e.empleadoId === nuevoEmpleado.value.empleadoId);
     if (empleadoOriginal !== -1) {
-      await updateEmpleados(nuevoEmpleado.value.id, nuevoEmpleado.value);
+      await updateEmpleados(nuevoEmpleado.value.empleadoId, nuevoEmpleado.value);
       Swal.fire({ icon: "success", title: "Empleado actualizado", text: "El empleado ha sido actualizado correctamente." });
     }
   } else {
     // Crear nuevo empleado
-    nuevoEmpleado.value.id = generarId();
+    nuevoEmpleado.value.empleadoId = generarId();
     empleadosRef.value = await addEmpleados(nuevoEmpleado.value);
     Swal.fire({ icon: "success", title: "Empleado agregado", text: "El empleado ha sido agregado correctamente." });
   }
@@ -170,12 +181,12 @@ const guardarEmpleado = async () => {
 
 function generarId() {
   // Obtener el ID máximo actual y sumar 1
-  const maxId = empleadosRef.value.length > 0 ? Math.max(...empleadosRef.value.map((e) => e.id)) : 0;
+  const maxId = empleadosRef.value.length;
   return maxId + 1;
 }
 
 function selEmpleado(id) {
-  const empleado = empleadosRef.value.find((e) => e.id === id);
+  const empleado = empleadosRef.value.find((e) => e.empleadoId === id);
   if (empleado) {
     nuevoEmpleado.value = { ...empleado };
   }
@@ -214,6 +225,7 @@ function validaciones(empleado) {
 function limpiarFormulario() {
   nuevoEmpleado.value = {
     id: null,
+    empleadoId: null,
     nombre: "",
     apellidos: "",
     email: "",

@@ -217,9 +217,8 @@ const nuevaTarea = ref({
   titulo: "",
   descripcion: "",
   estado: "",
-  prioridad: "",
+  prioridad: "baja",
   empleadoId: null,
-  empleadoNombre: "",
 });
 
 const estadoEmpleadoId = ref("");
@@ -248,29 +247,25 @@ const guardarTarea = async () => {
   if (empleado) {
     nuevaTarea.value.empleadoNombre = obtenerNombreCompletoEmpleado(empleado);
   }
+
+  const { empleadoNombre, ...tareaParaGuardar } = nuevaTarea.value;
   
   if (nuevaTarea.value.id) {
     // Actualizar tarea existente
     const tareaOriginal = tareasRef.value.findIndex((e) => e.id === nuevaTarea.value.id);
     if (tareaOriginal !== -1) {
-      await updateTareas(nuevaTarea.value.id, nuevaTarea.value);
+      await updateTareas(nuevaTarea.value.id, tareaParaGuardar);
       Swal.fire({ icon: "success", title: "Tarea actualizada", text:"La tarea ha sido actualizada correctamente." });
     }
   } else {
     // Crear nueva tarea
-    nuevaTarea.value.id = generarId();
-    tareasRef.value = await addTareas(nuevaTarea.value);
+    await addTareas(tareaParaGuardar);
+    obtenerTareas();
     Swal.fire({ icon: "success", title: "Tarea agregada", text: "La tarea ha sido agregada correctamente." });
   }
   
   limpiarFormulario();
 };
-
-function generarId() {
-  // Obtener el ID máximo actual y sumar 1
-  const maxId = tareasRef.value.length > 0 ? Math.max(...tareasRef.value.map((e) => e.id)) : 0;
-  return maxId + 1;
-}
 
 function selTarea(id) {
   const tarea = tareasRef.value.find((e) => e.id === id);
@@ -317,7 +312,7 @@ function buscarEmpleadoPorId(id) {
     return null;
   }
 
-  return empleadosRef.value.find((e) => String(e.id) === String(idNormalizado)) ?? null;
+  return empleadosRef.value.find((e) => String(e.empleadoId) === String(idNormalizado)) ?? null;
 }
 
 function obtenerNombreCompletoEmpleado(empleado) {
@@ -352,7 +347,7 @@ function validarEmpleadoSeleccionado() {
     estadoEmpleadoId.value = "valid";
     mensajeEmpleadoId.value = `Empleado encontrado: ${obtenerNombreCompletoEmpleado(empleado)}`;
     nuevaTarea.value.empleadoNombre = obtenerNombreCompletoEmpleado(empleado);
-    nuevaTarea.value.empleadoId = empleado.id;
+    nuevaTarea.value.empleadoId = empleado.empleadoId;
     return true;
   }
 
@@ -421,7 +416,7 @@ function limpiarFormulario() {
     titulo: "",
     descripcion: "",
     estado: "",
-    prioridad: "",
+    prioridad: "baja",
     empleadoId: null,
     empleadoNombre: "",
   };
