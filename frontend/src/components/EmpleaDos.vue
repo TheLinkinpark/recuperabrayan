@@ -68,6 +68,9 @@
           </select>
 
           <div class="d-flex flex-wrap gap-2 mt-4 justify-content-center">
+            <button v-if="nuevoEmpleado.id" type="button" class="btn btn-secondary" @click="imprimirTareas">
+              <i class="fas fa-print"></i> Tareas asignadas
+            </button>
             <button type="submit" class="btn btn-primary px-4">
               {{ nuevoEmpleado.id ? "Actualizar" : "Guardar" }}
             </button>
@@ -138,11 +141,14 @@
 import { ref, onMounted } from "vue";
 import Swal from "sweetalert2";
 import { getEmpleados, addEmpleados, updateEmpleados, delEmpleados } from "../api/empleados.js";
+import { getTareas } from "../api/tareas.js";
 import { jsPDF } from "jspdf";
 import "jspdf-autotable";
 
 onMounted(() => {
   obtenerEmpleados();
+  obtenerTareas();
+
 });
 
 const nuevoEmpleado = ref({
@@ -157,6 +163,7 @@ const nuevoEmpleado = ref({
 
 
 const empleadosRef = ref([]);
+const tareasRef = ref([]);
 
 
 const guardarEmpleado = async () => {
@@ -211,6 +218,13 @@ const obtenerEmpleados = () => {
   return empleadosRef.value;
 }
 
+const obtenerTareas = () => {
+  getTareas().then((data) => {
+    tareasRef.value = data;
+  });
+  return tareasRef.value;
+}
+
 
 function validaciones(empleado) {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -259,13 +273,14 @@ const imprimirListado = () => {
   doc.setFontSize(12);
 
   // Definir los encabezados de la tabla
-  const headers = ["Nombre", "Apellidos", "Email", "Móvil", "Puesto"];
+  const headers = ["ID","Nombre", "Apellidos", "Email", "Móvil", "Puesto"];
 
   // Generar tabla con los datos de empleados
   doc.autoTable({
     startY: y,
     head: [headers],
     body: empleadosRef.value.map(empleado => [
+      empleado.empleadoId,
       empleado.nombre,
       empleado.apellidos,
       empleado.email,
@@ -280,6 +295,50 @@ const imprimirListado = () => {
   doc.save("listado_empleados.pdf");
 }
 
+const ORDEN_PRIORIDAD = { alta: 1, media: 2, baja: 3 };
+const imprimirTareas = () => {
+
+  const tareasEmpleado = tareasRef.value.filter(tarea => tarea.empleadoId === nuevoEmpleado.value.empleadoId);
+  const tareasOrdenadas = [...tareasEmpleado].sort((a, b) => ORDEN_PRIORIDAD[a.prioridad.toLowerCase()] - ORDEN_PRIORIDAD[b.prioridad.toLowerCase()]);
+
+  const doc = new jsPDF();
+
+  // Verificar si autoTable está disponible
+  if (typeof doc.autoTable !== "function") {
+    console.error("autoTable NO está disponible en esta instancia de jsPDF");
+    return;
+  }
+
+  // Título del PDF
+  doc.setFontSize(18);
+  doc.text(`Tareas asignadas a ${nuevoEmpleado.value.nombre} ${nuevoEmpleado.value.apellidos}`, 14, 20);
+
+  // Espacio para los datos de la tabla
+  let y = 30;
+  doc.setFontSize(12);
+
+    // Definir los encabezados de la tabla
+  const headers = ["ID", "Título", "Prioridad", "Estado"];
+
+  // Generar tabla con los datos de tareas
+  doc.autoTable({
+    startY: y,
+    head: [headers],
+    body: tareasOrdenadas.map(tarea => [
+      tarea.id,
+      tarea.titulo,
+      tarea.prioridad,
+      tarea.estado
+    ]),
+    theme: "striped",
+    styles: { fontSize: 10, cellPadding: 3 }
+  });
+
+  // Guardar el PDF
+  doc.save("tareas_empleado.pdf");
+
+
+}
 </script>
 
 <style scoped></style>

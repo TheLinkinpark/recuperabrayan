@@ -191,6 +191,11 @@
               </tr>
             </tbody>
           </table>
+              <div class="d-flex justify-content-end mt-3">
+                <button class="btn btn-secondary px-4" @click="imprimirListado">
+                  Imprimir listado
+                </button>
+              </div>
           </div>
           </div>
         </div>
@@ -204,6 +209,8 @@ import { ref, onMounted } from "vue";
 import { getTareas, addTareas, updateTareas, delTareas } from "../api/tareas.js";
 import { getEmpleados } from "../api/empleados.js";
 import Swal from "sweetalert2";
+import { jsPDF } from "jspdf";
+import "jspdf-autotable";
 
 
 onMounted(() => {
@@ -421,5 +428,49 @@ function limpiarFormulario() {
     empleadoNombre: "",
   };
   limpiarEstadoEmpleadoId();
+}
+
+const ORDEN_PRIORIDAD = { alta: 1, media: 2, baja: 3 };
+const imprimirListado = () => {
+
+  const tareasOrdenadas = [...tareasRef.value].sort((a, b) => ORDEN_PRIORIDAD[a.prioridad.toLowerCase()] - ORDEN_PRIORIDAD[b.prioridad.toLowerCase()]);
+
+
+  const doc = new jsPDF();
+
+  // Verificar si autoTable está disponible
+  if (typeof doc.autoTable !== "function") {
+    console.error("autoTable NO está disponible en esta instancia de jsPDF");
+    return;
+  }
+
+  // Título del PDF
+  doc.setFontSize(18);
+  doc.text("Listado de Tareas", 14, 20);
+
+  // Espacio para los datos de la tabla
+  let y = 30;
+  doc.setFontSize(12);
+
+  // Definir los encabezados de la tabla
+  const headers = ["ID", "Título", "Prioridad", "Estado", "Empleado ID"];
+
+  // Generar tabla con los datos de tareas
+  doc.autoTable({
+    startY: y,
+    head: [headers],
+    body: tareasOrdenadas.map(tarea => [
+      tarea.id,
+      tarea.titulo,
+      tarea.prioridad,
+      tarea.estado,
+      tarea.empleadoId
+    ]),
+    theme: "striped",
+    styles: { fontSize: 10, cellPadding: 3 }
+  });
+
+  // Guardar el PDF
+  doc.save("listado_tareas.pdf");
 }
 </script>

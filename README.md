@@ -1,7 +1,7 @@
 # Vue 3 + Vite
 
 * Nombre del proyecto: Brayan Macedo Barbosa
-* Tecnologías Aplicadas: Vue 3 + Vite + vue-router, json-server, axios, bootstrap
+* Tecnologías Aplicadas: Vue 3 + Vite + vue-router, json-server, axios, bootstrap, jspdf
 * Versión de node: v24.14.0
 
 ## Instrucciones de instalación:
