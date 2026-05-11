@@ -89,40 +89,45 @@
       <div class="col-12 col-xl-7">
         <div class="card border-0 shadow-sm rounded-4">
           <div class="card-body p-3 p-md-4">
-        <div class="table-responsive">
-          <h4 class="mb-3">Listado de empleados</h4>
-          <table
-            class="table table-bordered table-striped table-hover table-sm align-middle"
-          >
-            <thead class="table-primary">
-              <tr>
-                <th class="text-center">Nombre</th>
-                <th class="text-center">Apellidos</th>
-                <th class="text-center">Email</th>
-                <th class="text-center">Móvil</th>
-                <th class="text-center">Puesto</th>
-                <th class="text-center">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="empleado in obtenerEmpleados()" :key="empleado.id">
-                <td class="text-center">{{ empleado.nombre }}</td>
-                <td class="text-center">{{ empleado.apellidos }}</td>
-                <td class="text-center">{{ empleado.email }}</td>
-                <td class="text-center">{{ empleado.movil }}</td>
-                <td class="text-center">{{ empleado.puesto }}</td>
-                <td class="text-center">
-                  <div class="d-flex gap-2 justify-content-center align-items-center flex-wrap">
-                    <button class="btn btn-sm btn-warning" @click="selEmpleado(empleado.empleadoId)"><i class="fas fa-edit"></i></button>
-                    <button class="btn btn-sm btn-danger" @click="borrarEmpleado(empleado.id)"><i class="fas fa-trash"></i></button>
-                  </div>
-                </td>
+            <div class="table-responsive">
+              <h4 class="mb-3">Listado de empleados</h4>
+              <table
+                class="table table-bordered table-striped table-hover table-sm align-middle"
+              >
+                <thead class="table-primary">
+                  <tr>
+                    <th class="text-center">Nombre</th>
+                    <th class="text-center">Apellidos</th>
+                    <th class="text-center">Email</th>
+                    <th class="text-center">Móvil</th>
+                    <th class="text-center">Puesto</th>
+                    <th class="text-center">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="empleado in obtenerEmpleados()" :key="empleado.id">
+                    <td class="text-center">{{ empleado.nombre }}</td>
+                    <td class="text-center">{{ empleado.apellidos }}</td>
+                    <td class="text-center">{{ empleado.email }}</td>
+                    <td class="text-center">{{ empleado.movil }}</td>
+                    <td class="text-center">{{ empleado.puesto }}</td>
+                    <td class="text-center">
+                      <div class="d-flex gap-2 justify-content-center align-items-center flex-wrap">
+                        <button class="btn btn-sm btn-warning" @click="selEmpleado(empleado.empleadoId)"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-sm btn-danger" @click="borrarEmpleado(empleado.id)"><i class="fas fa-trash"></i></button>
+                      </div>
+                    </td>
 
-              </tr>
-            </tbody>
-          </table>
+                  </tr>
+                </tbody>
+              </table>
+              <div class="d-flex justify-content-end mt-3">
+                <button class="btn btn-secondary px-4" @click="imprimirListado">
+                  Imprimir listado
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
         </div>
       </div>
     </div>
@@ -133,6 +138,8 @@
 import { ref, onMounted } from "vue";
 import Swal from "sweetalert2";
 import { getEmpleados, addEmpleados, updateEmpleados, delEmpleados } from "../api/empleados.js";
+import { jsPDF } from "jspdf";
+import "jspdf-autotable";
 
 onMounted(() => {
   obtenerEmpleados();
@@ -233,6 +240,46 @@ function limpiarFormulario() {
     puesto: "",
   };
 }
+
+const imprimirListado = () => {
+  const doc = new jsPDF();
+
+  // Verificar si autoTable está disponible
+  if (typeof doc.autoTable !== "function") {
+    console.error("autoTable NO está disponible en esta instancia de jsPDF");
+    return;
+  }
+
+  // Título del PDF
+  doc.setFontSize(18);
+  doc.text("Listado de Empleados", 14, 20);
+
+  // Espacio para los datos de la tabla
+  let y = 30;
+  doc.setFontSize(12);
+
+  // Definir los encabezados de la tabla
+  const headers = ["Nombre", "Apellidos", "Email", "Móvil", "Puesto"];
+
+  // Generar tabla con los datos de empleados
+  doc.autoTable({
+    startY: y,
+    head: [headers],
+    body: empleadosRef.value.map(empleado => [
+      empleado.nombre,
+      empleado.apellidos,
+      empleado.email,
+      empleado.movil,
+      empleado.puesto
+    ]),
+    theme: "striped",
+    styles: { fontSize: 10, cellPadding: 3 }
+  });
+
+  // Guardar el PDF
+  doc.save("listado_empleados.pdf");
+}
+
 </script>
 
 <style scoped></style>
