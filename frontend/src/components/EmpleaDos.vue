@@ -7,65 +7,89 @@
 
       <div class="col-12 col-xl-5">
         <div class="card border-0 shadow-sm rounded-4">
-          <div class="card-body p-4">
-            <div class="dflex justify-content-between align-items-center mb-3">
+          <div class="row g-3 card-body p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
               <h4>{{ nuevoEmpleado.id ? "Editar Empleado" : "Nuevo Empleado" }}</h4>
             </div>
 
         <form @submit.prevent="guardarEmpleado">
-          <label for="nombre" class="form-label">Nombre: </label>
-          <input
-            type="text"
-            id="nombre"
-            name="nombre"
-            class="form-control"
-            v-model="nuevoEmpleado.nombre"
-            required
-          />
+          
+          
+          <div class="row g-3">
+            <div class="col-12 col-md-5">
+              <label for="nombre" class="form-label">Nombre</label>
+              <input
+                type="text"
+                id="nombre"
+                name="nombre"
+                class="form-control "
+                v-model="nuevoEmpleado.nombre"
+                placeholder="Ej: Pedro"
+                required
+              />
+            </div>
 
-          <label for="apellidos" class="form-label">Apellidos</label>
-          <input
-            type="text"
-            id="apellidos"
-            name="apellidos"
-            class="form-control"
-            v-model="nuevoEmpleado.apellidos"
-            required
-          />
+            <div class="col-12 col-md-7">
+              <label for="apellidos" class="form-label">Apellidos</label>
+              <input
+                type="text"
+                id="apellidos"
+                name="apellidos"
+                class="form-control"
+                v-model="nuevoEmpleado.apellidos"
+                placeholder="Ej: Rodríguez García"
+                required
+              />
+            </div>
+          </div>
 
-          <label for="email" class="form-label">Email</label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            class="form-control"
-            v-model="nuevoEmpleado.email"
-            required
-          />
 
-          <label for="movil" class="form-label">Móvil</label>
-          <input
-            type="tel"
-            id="movil"
-            name="movil"
-            class="form-control"
-            v-model="nuevoEmpleado.movil"
-            required
-          />
+          <div class="row g-3 mt-3">
+            <div class="col-12 col-md-8">
+              <label for="email" class="form-label">Email</label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                class="form-control"
+                v-model="nuevoEmpleado.email"
+                placeholder="Ej: pedro.rodriguez@example.com"
+                required
+              />
+            </div>
 
-          <label for="puesto" class="form-label">Puesto</label>
-          <select
-            id="puesto"
-            name="puesto"
-            class="form-select"
-            v-model="nuevoEmpleado.puesto"
-            required
-          >
-            <option value="RRHH">RRHH</option>
-            <option value="contabilidad">Contabilidad</option>
-            <option value="almacen">Almacén</option>
-            <option value="ventas">Ventas</option>
-          </select>
+            <div class="col-12 col-md-4">
+              <label for="movil" class="form-label">Móvil</label>
+              <input
+                type="tel"
+                id="movil"
+                name="movil"
+                class="form-control"
+                v-model="nuevoEmpleado.movil"
+                placeholder="Ej: 612345678"
+                required
+              />
+            </div>
+          </div>
+
+
+          <div class="col-12 col-md-6 mt-3">
+            <label for="puesto" class="form-label">Puesto</label>
+            <select
+              id="puesto"
+              name="puesto"
+              class="form-select "
+              v-model="nuevoEmpleado.puesto"
+              required
+            >
+              <option value="" disabled selected hidden>Selecciona un puesto...</option>
+              <option value="RRHH" selected>RRHH</option>
+              <option value="contabilidad">Contabilidad</option>
+              <option value="almacen">Almacén</option>
+              <option value="ventas">Ventas</option>
+            </select>
+          </div>
+
 
           <div class="d-flex flex-wrap gap-2 mt-4 justify-content-center">
             <button v-if="nuevoEmpleado.id" type="button" class="btn btn-secondary" @click="imprimirTareas">
