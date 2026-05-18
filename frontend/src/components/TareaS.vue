@@ -14,30 +14,34 @@
           </div>
 
           <form @submit.prevent="guardarTarea">
-            <div class="mb-3">
-              <label for="fecha" class="form-label">Fecha</label>
-              <input
-                type="date"
-                id="fecha"
-                name="fecha"
-                class="form-control"
-                v-model="nuevaTarea.fecha"
-                required
-              />
+
+            <div class="row g-3">
+
+              <div class="col-12 col-md-8 mb-3">
+                <label for="titulo" class="form-label">Título</label>
+                <input
+                  type="text"
+                  id="titulo"
+                  name="titulo"
+                  class="form-control"
+                  v-model="nuevaTarea.titulo"
+                  placeholder="Ej: Revisión semanal del backlog"
+                  required
+                />
+              </div>
+              <div class="col-12 col-md-4 mb-3">
+                <label for="fecha" class="form-label">Fecha</label>
+                <input
+                  type="date"
+                  id="fecha"
+                  name="fecha"
+                  class="form-control"
+                  v-model="nuevaTarea.fecha"
+                  required
+                />
+              </div>
             </div>
 
-            <div class="mb-3">
-              <label for="titulo" class="form-label">Título</label>
-              <input
-                type="text"
-                id="titulo"
-                name="titulo"
-                class="form-control"
-                v-model="nuevaTarea.titulo"
-                placeholder="Ej: Revisión semanal del backlog"
-                required
-              />
-            </div>
 
             <div class="mb-3">
               <label for="descripcion" class="form-label">Descripción</label>
@@ -50,6 +54,24 @@
                 placeholder="Describe de forma breve qué se debe hacer"
                 required
               ></textarea>
+            </div>
+
+            <div class="row g-3">
+              <div class="col-12 col-md-4">
+                <label for="horas">Horas</label>
+                <input type="text" id="horas" name="horas" class="form-control" v-model="nuevaTarea.horas" placeholder="4"/>
+              </div>
+
+              <div class="col-12 col-md-4">
+                <label for="precio">Precio</label>
+                <input type="text" id="precio" name="precio" class="form-control" v-model="nuevaTarea.precio" placeholder="15 €">
+              </div>
+
+              <div class="col-12 col-md-4">
+                <label for="total">Total</label>
+                <input type="text" id="total" name="total" class="form-control" :value="calcularPrecio()" disabled>
+              </div>
+
             </div>
 
             <div class="row g-3">
@@ -156,6 +178,7 @@
           >
             <thead class="table-primary">
               <tr>
+                <th></th>
                 <th class="text-center fw-semibold">Fecha</th>
                 <th class="text-center fw-semibold">Título</th>
                 <th class="text-center fw-semibold">Descripción</th>
@@ -167,6 +190,7 @@
             </thead>
             <tbody>
               <tr v-for="tarea in obtenerTareas()" :key="tarea.id">
+                <td><input type="checkbox" class="form-check-input"></td>
                 <td class="text-center">{{ tarea.fecha }}</td>
                 <td class="text-center">{{ tarea.titulo }}</td>
                 <td class="text-center">{{ tarea.descripcion }}</td>
@@ -226,6 +250,9 @@ const nuevaTarea = ref({
   estado: "",
   prioridad: "baja",
   empleadoId: null,
+  horas: null,
+  precio: null,
+  total: null
 });
 
 const estadoEmpleadoId = ref("");
@@ -472,5 +499,16 @@ const imprimirListado = () => {
 
   // Guardar el PDF
   doc.save("listado_tareas.pdf");
+}
+
+
+const calcularPrecio = () => {
+  const total = nuevaTarea.value.horas * nuevaTarea.value.precio;
+  nuevaTarea.value.total = total;
+  return total;
+}
+
+const iniciarPago = () => {
+
 }
 </script>
