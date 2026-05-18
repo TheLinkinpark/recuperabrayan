@@ -61,7 +61,7 @@
     },
     {
       "id": "2",
-      "fecha": "2026-04-08",
+      "fecha": "2026-04-07",
       "titulo": "Reunión con cliente",
       "descripcion": "Reunión para discutir los detalles del proyecto",
       "estado": "proceso",
@@ -73,7 +73,7 @@
     },
     {
       "id": "3",
-      "fecha": "2026-04-09",
+      "fecha": "2026-04-07",
       "titulo": "Envío de informe mensual",
       "descripcion": "Enviar el informe mensual al equipo de dirección",
       "estado": "proceso",

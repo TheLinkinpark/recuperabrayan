@@ -17,3 +17,8 @@
 
 4. Ver en navegador
     - http://localhost:5173
+
+## Backend de Stripe
+
+El servidor Express de Stripe escucha en `http://localhost:5000` y se arranca junto con Vite y `json-server` mediante `npm start`.
+Recuerda definir `STRIPE_SECRET_KEY` en un archivo `.env` en la raíz del proyecto para que el checkout funcione.

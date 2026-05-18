@@ -190,7 +190,7 @@
             </thead>
             <tbody>
               <tr v-for="tarea in obtenerTareas()" :key="tarea.id">
-                <td><input type="checkbox" class="form-check-input"></td>
+                <td><input type="checkbox" class="form-check-input" :value="tarea" v-model="tareasSeleccionadas" @change="comprobarFecha(tarea)"></td>
                 <td class="text-center">{{ tarea.fecha }}</td>
                 <td class="text-center">{{ tarea.titulo }}</td>
                 <td class="text-center">{{ tarea.descripcion }}</td>
@@ -225,21 +225,128 @@
         </div>
       </div>
     </div>
+
+    <!-- Barra flotante de pago -->
+    <Transition name="slide-up">
+      <div
+        v-if="tareasSeleccionadas.length > 0"
+        class="position-fixed bottom-0 start-50 translate-middle-x mb-3 d-flex align-items-center justify-content-between flex-wrap gap-3 px-4 py-3 rounded-4 shadow-lg bg-primary"
+        style="width: calc(100% - 3rem); max-width: 800px; z-index: 1050;"
+      >
+        <div class="d-flex align-items-center gap-3">
+          <span class="badge bg-white text-primary fs-6 fw-bold px-3 py-2 rounded-pill shadow-sm">
+            {{ tareasSeleccionadas.length }}
+            {{ tareasSeleccionadas.length === 1 ? 'tarea' : 'tareas' }}
+          </span>
+          <div class="vr bg-white opacity-50"></div>
+          <div class="text-white">
+            <span class="opacity-75 me-1 small">Total</span>
+            <span class="fs-5 fw-bold">{{ totalFactura.toFixed(2) }} €</span>
+          </div>
+        </div>
+
+        <div class="d-flex gap-2 flex-wrap">
+          <button
+            class="btn btn-light text-primary fw-semibold px-4"
+            @click="generarFactura"
+          >
+            <i class="fas fa-file-invoice me-2"></i>Ver Factura
+          </button>
+          <button
+            class="btn btn-warning fw-semibold px-4 text-dark"
+            @click="iniciarPago"
+          >
+            <i class="fab fa-stripe-s me-2"></i>Pagar con Stripe
+          </button>
+        </div>
+      </div>
+    </Transition>
+
+    <div v-if="mostrarFactura" class="modal d-block bg-dark bg-opacity-50" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content animate__animated animate__fadeIn">
+          <div id="seccion-factura" class="modal-body p-5">
+            <div class="d-flex justify-content-between mb-4">
+              <div>
+                <h4>FACTURA</h4>
+                <p class="text-muted">Código: {{ codigoFactura }}</p>
+              </div>
+              <div class="text-end">
+                <h5>Fecha: {{ fechaFactura }}</h5>
+              </div>
+
+              <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" @click="mostrarFactura = false">Cerrar</button>
+                <button type="button" class="btn btn-dark" @click="imprimirFactura">Imprimir Factura</button>
+                <button type="button" class="btn btn-success" @click="iniciarPago">Pagar con Stripe ({{ totalFactura }}€)</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <transition name="fade">
+      <div
+        v-if="mostrarPagoExitoso"
+        class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+        style="z-index: 2000; background: rgba(15, 23, 42, 0.72); backdrop-filter: blur(6px);"
+      >
+        <div class="card border-0 shadow-lg rounded-5 p-4 p-md-5 text-center mx-3" style="max-width: 520px; width: 100%;">
+          <div class="d-flex justify-content-center mb-3">
+            <div class="rounded-circle bg-success-subtle text-success d-flex align-items-center justify-content-center" style="width: 84px; height: 84px;">
+              <i class="fas fa-check fa-2x"></i>
+            </div>
+          </div>
+          <h3 class="mb-2">Pago realizado con éxito</h3>
+          <p class="text-muted mb-3">Tu pago se ha completado correctamente. Ya puedes imprimir la factura.</p>
+
+          <div class="bg-light rounded-4 p-3 text-start mb-4">
+            <div class="d-flex justify-content-between gap-3 flex-wrap">
+              <span class="fw-semibold">Factura</span>
+              <span>{{ facturaConfirmada?.codigoFactura || codigoFactura }}</span>
+            </div>
+            <div class="d-flex justify-content-between gap-3 flex-wrap">
+              <span class="fw-semibold">Total</span>
+              <span>{{ (facturaConfirmada?.total ?? totalFactura).toFixed(2) }} €</span>
+            </div>
+            <div class="d-flex justify-content-between gap-3 flex-wrap">
+              <span class="fw-semibold">Estado</span>
+              <span class="text-success fw-semibold">{{ facturaConfirmada?.estadoTexto || 'Pagado' }}</span>
+            </div>
+          </div>
+
+          <div class="d-flex flex-column flex-sm-row gap-2 justify-content-center">
+            <button type="button" class="btn btn-success px-4" @click="imprimirFacturaConfirmada">
+              Imprimir factura
+            </button>
+            <button type="button" class="btn btn-outline-secondary px-4" @click="cerrarAvisoPago">
+              Cerrar
+            </button>
+          </div>
+        </div>
+      </div>
+    </transition>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { getTareas, addTareas, updateTareas, delTareas } from "../api/tareas.js";
 import { getEmpleados } from "../api/empleados.js";
 import Swal from "sweetalert2";
 import { jsPDF } from "jspdf";
 import "jspdf-autotable";
 
+const route = useRoute();
+const router = useRouter();
+
 
 onMounted(() => {
   obtenerTareas();
   verEmpleados();
+  revisarPagoStripe();
 });
 
 const nuevaTarea = ref({
@@ -259,10 +366,11 @@ const estadoEmpleadoId = ref("");
 const mensajeEmpleadoId = ref("");
 
 const empleadosRef = ref([]);
-
-
-
 const tareasRef = ref([]);
+
+const tareasSeleccionadas = ref([]);
+const mostrarPagoExitoso = ref(false);
+const facturaConfirmada = ref(null);
 
 
 /* FUNCIONES CRUD */
@@ -502,13 +610,211 @@ const imprimirListado = () => {
 }
 
 
+/* PAGO TAREAS */
+
+const comprobarFecha = (tarea) => {
+  const existe = tareasSeleccionadas.value.some(t => t.id === tarea.id);
+  if(!existe) return;
+
+  if(tareasSeleccionadas.value.length === 1) return;
+
+  const fechaReferencia = tareasSeleccionadas.value[0].fecha;
+
+  if(tarea.fecha !== fechaReferencia) {
+    Swal.fire({icon: 'error', title: 'Fecha no válida', text: `Todas las tareas deben de tener la misma fecha (${fechaReferencia})`})
+    tareasSeleccionadas.value = tareasSeleccionadas.value.filter(t => t.id !== tarea.id);
+  }
+}
+
+
 const calcularPrecio = () => {
   const total = nuevaTarea.value.horas * nuevaTarea.value.precio;
   nuevaTarea.value.total = total;
   return total;
 }
 
-const iniciarPago = () => {
+const mostrarFactura = ref(false);
 
+const codigoFactura = computed(() => {
+  return `FAC-${String(Date.now()).slice(-6)}`;
+});
+
+const fechaFactura = computed(() => {
+  return tareasSeleccionadas.value.length > 0 ? tareasSeleccionadas.value[0].fecha : '';
+});
+
+const totalFactura = computed(() => {
+  return tareasSeleccionadas.value.reduce((acumulador, tarea) => {
+    return acumulador + (Number(tarea.total) || 0);
+  }, 0);
+});
+
+const generarFactura = () => {
+  if (tareasSeleccionadas.value.length === 0) return;
+  mostrarFactura.value = true;
+};
+
+
+const iniciarPago = async () => {
+  if (!tareasSeleccionadas.value.length) {
+    Swal.fire({ icon: 'warning', title: 'Aviso', text: 'No hay tareas seleccionadas para pagar.' });
+    return;
+  }
+
+  try {
+    // Crear la sesión de pago en el backend
+    const response = await fetch('http://localhost:5000/crear-checkout-session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        frontendOrigin: window.location.origin,
+        items: tareasSeleccionadas.value.map(t => ({
+          id:          t.id,
+          titulo:      t.titulo,
+          horas:       t.horas,
+          precio:      t.precio,
+          total:       Number(t.total) || 0,
+          empleadoId:  t.empleadoId,
+        })),
+        amount: totalFactura.value,         // total en €
+        codigoFactura: codigoFactura.value, // FAC-xxxxxx para referencia en Stripe
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error HTTP ${response.status}`);
+    }
+
+    const session = await response.json();
+
+    if (!session.url) {
+      console.error('No se recibió URL de Stripe.');
+      Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo iniciar el pago.' });
+      return;
+    }
+
+    sessionStorage.setItem(
+      'stripePendingItems',
+      JSON.stringify(tareasSeleccionadas.value.map(t => ({
+        id: t.id,
+        titulo: t.titulo,
+        horas: t.horas,
+        precio: t.precio,
+        total: Number(t.total) || 0,
+        empleadoId: t.empleadoId,
+      })))
+    );
+
+    // Redirigir directamente al checkout de Stripe
+    window.location.href = session.url;
+
+  } catch (error) {
+    console.error('Error en iniciarPago:', error);
+    Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo conectar con el servidor de pagos.' });
+  }
 }
+
+const revisarPagoStripe = async () => {
+  const paymentStatus = route.query.payment;
+  const sessionId = route.query.session_id;
+
+  if (paymentStatus !== 'success' || !sessionId) {
+    return;
+  }
+
+  try {
+    const respuesta = await fetch(`http://localhost:5000/verificar-pago?session_id=${encodeURIComponent(sessionId)}`);
+    if (!respuesta.ok) {
+      throw new Error(`Error HTTP ${respuesta.status}`);
+    }
+
+    const datos = await respuesta.json();
+    facturaConfirmada.value = {
+      codigoFactura: datos.codigoFactura,
+      total: Number(datos.total) || 0,
+      estadoTexto: datos.estado === 'paid' ? 'Pagado' : 'Pendiente',
+    };
+    mostrarPagoExitoso.value = true;
+    router.replace({ path: '/tareas' });
+  } catch (error) {
+    console.error('Error verificando pago:', error);
+    Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo verificar el pago.' });
+  }
+};
+
+const cerrarAvisoPago = () => {
+  mostrarPagoExitoso.value = false;
+  router.replace({ path: '/tareas' });
+};
+
+const obtenerItemsFactura = () => {
+  if (tareasSeleccionadas.value.length > 0) {
+    return tareasSeleccionadas.value;
+  }
+
+  try {
+    return JSON.parse(sessionStorage.getItem('stripePendingItems') || '[]');
+  } catch {
+    return [];
+  }
+};
+
+const imprimirFacturaConfirmada = () => {
+  const factura = facturaConfirmada.value;
+  const items = obtenerItemsFactura();
+  const codigo = factura?.codigoFactura || codigoFactura.value;
+  const total = factura?.total ?? totalFactura.value;
+  const fechaFacturaImpresion = new Date().toLocaleDateString('es-ES');
+  const doc = new jsPDF();
+
+
+  doc.setFontSize(20);
+  doc.text('Factura', 14, 18);
+
+  doc.setFontSize(11);
+  doc.text(`Código factura: ${codigo}`, 14, 28);
+  doc.text(`Fecha de la factura: ${fechaFacturaImpresion}`, 14, 35);
+
+
+  const startY = 50;
+  doc.setFontSize(12);
+
+  const headers = ['Nombre de tarea', 'Fecha de la factura', 'Horas', 'Precio/hora', 'Total'];
+
+  doc.autoTable({
+    startY: startY,
+    head: [headers],
+    body: items.map((tarea) => [
+      tarea.titulo || '',
+      fechaFacturaImpresion,
+      String(tarea.horas ?? ''),
+      `${Number(tarea.precio || 0).toFixed(2)} €`,
+      `${Number(tarea.total || 0).toFixed(2)} €`,
+    ]),
+    theme: 'striped',
+    styles: {
+      fontSize: 10,
+      cellPadding: 3
+    }
+  });
+
+  // Colocar el total con un pequeño margen debajo de la tabla
+  const tablaFinalY = (doc.lastAutoTable && doc.lastAutoTable.finalY) ? doc.lastAutoTable.finalY : startY;
+  const margen = 8; // ajuste en puntos (px en PDF)
+  const posTotalY = tablaFinalY + margen;
+  doc.setFontSize(12);
+  try {
+    doc.setFont('helvetica', 'bold');
+  } catch (e) {
+    // ignore if font style not available
+  }
+  doc.text(`Total: ${Number(total).toFixed(2)} €`, 14, posTotalY);
+  try {
+    doc.setFont('helvetica', 'normal');
+  } catch (e) {}
+
+  doc.save("factura.pdf");
+};
+
+
 </script>
