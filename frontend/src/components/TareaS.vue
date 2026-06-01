@@ -64,7 +64,7 @@
 
               <div class="col-12 col-md-4">
                 <label for="precio">Precio</label>
-                <input type="text" id="precio" name="precio" class="form-control" v-model="nuevaTarea.precio" placeholder="15 €">
+                <input type="text" id="precio" name="precio" class="form-control" v-model="nuevaTarea.precio" placeholder="15">
               </div>
 
               <div class="col-12 col-md-4">
@@ -215,7 +215,15 @@
               </tr>
             </tbody>
           </table>
+
               <div class="d-flex justify-content-end mt-3">
+                <!-- FILTRADO tareas
+                <button @click="mostrarTodasLasTareas"><i class="bi bi-arrow-clockwise"></i></button>
+                <button class="btn btn-danger me-2" @click="filtrarTareas">
+                  Filtrar pendientes
+                </button>
+                 -->
+                
                 <button class="btn btn-secondary px-4" @click="imprimirListado">
                   Imprimir listado
                 </button>
@@ -246,17 +254,19 @@
         </div>
 
         <div class="d-flex gap-2 flex-wrap">
+          <!--
           <button
             class="btn btn-light text-primary fw-semibold px-4"
             @click="generarFactura"
           >
             <i class="fas fa-file-invoice me-2"></i>Ver Factura
           </button>
+          -->
           <button
             class="btn btn-warning fw-semibold px-4 text-dark"
             @click="iniciarPago"
           >
-            <i class="fab fa-stripe-s me-2"></i>Pagar con Stripe
+            <i class="fab fa-stripe-s me-2"></i>Pagar
           </button>
         </div>
       </div>
@@ -367,6 +377,8 @@ const mensajeEmpleadoId = ref("");
 
 const empleadosRef = ref([]);
 const tareasRef = ref([]);
+// Si se implementa el filtrado, usa esta variable en la tabla en vez de obtenerTareas()
+//const tareasMostradas = ref([]);
 
 const tareasSeleccionadas = ref([]);
 const mostrarPagoExitoso = ref(false);
@@ -437,10 +449,20 @@ const borrarTarea = async (id) => {
 const obtenerTareas = () => {
   getTareas().then((data) => {
     tareasRef.value = data;
+    tareasMostradas.value = data;
   });
   return tareasRef.value;
 }
 
+/* FILTRADO TAREAS
+const filtrarTareas = () => {
+  tareasMostradas.value = tareasRef.value.filter(t => t.estado === "pendiente");
+}
+
+const mostrarTodasLasTareas = () => {
+  tareasMostradas.value = tareasRef.value;
+}
+*/
 const verEmpleados = () => {
   getEmpleados().then((data) => {
     empleadosRef.value = data;
@@ -509,17 +531,17 @@ function validarEmpleadoSeleccionado() {
 
 
 function getEstadoBadgeClass(estado) {
-  if (estado === "pendiente") return "text-bg-danger";
-  if (estado === "proceso") return "text-bg-warning text-dark";
-  if (estado === "finalizada") return "text-bg-success";
-  return "text-bg-secondary";
+  if (estado === "pendiente") return "bg-danger-subtle text-danger border border-danger-subtle";
+  if (estado === "proceso") return "bg-warning-subtle text-warning-emphasis border border-warning-subtle";
+  if (estado === "finalizada") return "bg-success-subtle text-success border border-success-subtle";
+  return "bg-secondary-subtle text-secondary border border-secondary-subtle";
 }
 
 function getPrioridadBadgeClass(prioridad) {
-  if (prioridad === "alta") return "text-bg-danger";
-  if (prioridad === "media") return "text-bg-warning text-dark";
-  if (prioridad === "baja") return "text-bg-success";
-  return "text-bg-secondary";
+  if (prioridad === "alta") return "bg-danger-subtle text-danger border border-danger-subtle";
+  if (prioridad === "media") return "bg-warning-subtle text-warning-emphasis border border-warning-subtle";
+  if (prioridad === "baja") return "bg-success-subtle text-success border border-success-subtle";
+  return "bg-secondary-subtle text-secondary border border-secondary-subtle";
 }
 
 function formatearEstado(estado) {
@@ -570,6 +592,12 @@ const imprimirListado = () => {
 
   const tareasOrdenadas = [...tareasRef.value].sort((a, b) => ORDEN_PRIORIDAD[a.prioridad.toLowerCase()] - ORDEN_PRIORIDAD[b.prioridad.toLowerCase()]);
 
+  /* En caso de querer filtrar por estado al imprimir.
+     Cambiar el const de tareasOrdenadas por let.
+  if (nuevaTarea.value.estado !== "") {
+    tareasOrdenadas = tareasOrdenadas.filter(t => t.estado === nuevaTarea.value.estado);
+  }
+  */
 
   const doc = new jsPDF();
 
